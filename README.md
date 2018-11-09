@@ -106,7 +106,7 @@ See [Contribution Guidelines](CONTRIBUTING.md) and our [Code Of Conduct](CODE_OF
 MIT © [Aboviq AB](https://www.aboviq.com/)
 
 [npm-url]: https://npmjs.org/package/@aboviq/readdir-recursive
-[npm-image]: https://badge.fury.io/js/@aboviq/readdir-recursive.svg
+[npm-image]: https://badge.fury.io/js/%40aboviq%2Freaddir-recursive.svg
 [travis-url]: https://travis-ci.org/aboviq/readdir-recursive
 [travis-image]: https://travis-ci.org/aboviq/readdir-recursive.svg?branch=master
 [codestyle-url]: https://github.com/xojs/xo
