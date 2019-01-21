@@ -25,7 +25,7 @@ const readdirRecursive = async (dir, options = {}) => {
 		const stats = await statP(path);
 
 		if (stats.isDirectory()) {
-			if (recurse({dir: file, path, stats})) {
+			if (await recurse({dir: file, path, stats})) {
 				return [
 					...keptFiles,
 					...(await readdirRecursive(path, {recurse, filter, transform}))
@@ -34,8 +34,8 @@ const readdirRecursive = async (dir, options = {}) => {
 			return keptFiles;
 		}
 
-		if (filter({file, path, stats})) {
-			return [...keptFiles, transform({file, path, stats})];
+		if (await filter({file, path, stats})) {
+			return [...keptFiles, await transform({file, path, stats})];
 		}
 		return keptFiles;
 	}, []);
