@@ -8,6 +8,7 @@
 
 - No dependencies / Small
 - Asynchronous, i.e. returns a promise (uses async/await under the hood)
+- Provides a syncronous version as well
 - Sane defaults, i.e. does not recurse into `node_modules` by default
 - Fully customizable, with [options](#options) to decide in which folders to recurse into and what files and information to include in the results, with full access to each file's [Stats][fs-stats] information
 
@@ -34,6 +35,15 @@ const files = await readdirRecursive('a/path');
   ...
 ]
 */
+
+const files = readdirRecursive.sync('a/path');
+/*
+[
+  "/full-path/a/path/filename.ext",
+  "/full-path/a/path/nested/folders/another.ext",
+  ...
+]
+*/
 ```
 
 ## API
@@ -47,7 +57,18 @@ const files = await readdirRecursive('a/path');
 
 Returns: `Promise<Array>`, all found files transformed according to the transformer and that has not been filtered out
 
+### `readdirRecursive.sync(dir, options)`
+
+| Name    | Type     | Description                                                                           |
+| ------- | -------- | ------------------------------------------------------------------------------------- |
+| dir     | `String` | The folder to read files recursively in, either relative to `cwd` or an absolute path |
+| options | `Object` | Options for filtering, recursion and transformation                                   |
+
+Returns: `Array`, all found files transformed according to the transformer and that has not been filtered out
+
 ### Options
+
+**Note:** all function options can be asynchronous (return promises) when using the async version of `readdirRecursive`, but not with the sync version.
 
 #### `options.filter`
 

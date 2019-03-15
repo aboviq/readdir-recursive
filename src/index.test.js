@@ -144,3 +144,112 @@ describe('readdirRecursive', () => {
 		expect(files).toEqual(expect.arrayContaining([true]));
 	});
 });
+
+describe('readdirRecursiveSync', () => {
+	it('does not read files in "node_modules" by default', () => {
+		const files = readdirRecursive.sync('.');
+
+		expect(files).not.toEqual(
+			expect.arrayContaining([expect.stringMatching(/node_modules/)])
+		);
+	});
+
+	it('does read recursively by default', () => {
+		const files = readdirRecursive.sync('.');
+
+		expect(files).toEqual(
+			expect.arrayContaining([
+				expect.stringMatching(/package\.json$/),
+				expect.stringMatching(/src\/index\.js$/),
+				expect.stringMatching(/src\/index\.test\.js$/)
+			])
+		);
+	});
+
+	it('reads files relative to cwd by default', () => {
+		const files = readdirRecursive.sync('src');
+
+		expect(files).toHaveLength(2);
+		expect(files).toEqual(
+			expect.arrayContaining([__filename, join(__dirname, 'index.js')])
+		);
+	});
+
+	it('can read absolute paths', () => {
+		const files = readdirRecursive.sync(__dirname);
+
+		expect(files).toHaveLength(2);
+		expect(files).toEqual(
+			expect.arrayContaining([__filename, join(__dirname, 'index.js')])
+		);
+	});
+
+	it('filters files based on given filter function', () => {
+		const onlyTestFiles = ({file}) => /\.test\./.test(file);
+		const files = readdirRecursive.sync('.', {filter: onlyTestFiles});
+
+		expect(files).toEqual([__filename]);
+	});
+
+	it("passes full file path's to the filter function", () => {
+		const onlyThisFile = ({path}) => path === __filename;
+		const files = readdirRecursive.sync('.', {filter: onlyThisFile});
+
+		expect(files).toEqual([__filename]);
+	});
+
+	it("passes the file's stats to the filter function", () => {
+		const allFiles = ({stats}) => stats.isFile();
+		const files = readdirRecursive.sync('.', {filter: allFiles});
+
+		expect(files).toEqual(expect.arrayContaining([__filename]));
+	});
+
+	it('recurses directories based on given recurse function', () => {
+		const noSourceFiles = ({dir}) => dir !== 'src' && dir !== 'node_modules';
+		const files = readdirRecursive.sync('.', {recurse: noSourceFiles});
+
+		expect(files).not.toEqual(expect.arrayContaining([__filename]));
+	});
+
+	it('passes the full folder path to the recurse function', () => {
+		const noSourceFiles = ({path, dir}) =>
+			path !== __dirname && dir !== 'node_modules';
+		const files = readdirRecursive.sync('.', {recurse: noSourceFiles});
+
+		expect(files).not.toEqual(expect.arrayContaining([__filename]));
+	});
+
+	it("passes the folder's stats to the recurse function", () => {
+		const allFiles = ({stats, dir}) =>
+			stats.isDirectory() && dir !== 'node_modules';
+		const files = readdirRecursive.sync('.', {recurse: allFiles});
+
+		expect(files).toEqual(expect.arrayContaining([__filename]));
+	});
+
+	it('transforms files based on given transform function', () => {
+		const doubleFilename = ({file}) => `${file}${file}`;
+		const files = readdirRecursive.sync('.', {transform: doubleFilename});
+
+		expect(files).toEqual(
+			expect.arrayContaining(['index.jsindex.js', 'package.jsonpackage.json'])
+		);
+	});
+
+	it("passes full file path's to the transform function", () => {
+		const doubleFilePath = ({path}) => `${path}${path}`;
+		const files = readdirRecursive.sync('.', {transform: doubleFilePath});
+
+		expect(files).toEqual(
+			expect.arrayContaining([`${__filename}${__filename}`])
+		);
+	});
+
+	it("passes the file's stats to the transform function", () => {
+		const isFile = ({stats}) => stats.isFile();
+		const files = readdirRecursive.sync('.', {transform: isFile});
+
+		expect(files).toEqual(expect.arrayContaining([true]));
+	});
+});

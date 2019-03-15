@@ -1,6 +1,6 @@
 'use strict';
 const {promisify} = require('util');
-const {readdir, stat} = require('fs');
+const {readdir, stat, readdirSync, statSync} = require('fs');
 const {resolve} = require('path');
 
 const readdirP = promisify(readdir);
@@ -41,4 +41,31 @@ const readdirRecursive = async (dir, options = {}) => {
 	}, []);
 };
 
+const readdirRecursiveSync = (dir, options = {}) => {
+	const {recurse, filter, transform} = {...defaultOptions, ...options};
+	const files = readdirSync(dir);
+
+	return files.reduce((keptFiles, file) => {
+		const path = resolve(dir, file);
+		const stats = statSync(path);
+
+		if (stats.isDirectory()) {
+			if (recurse({dir: file, path, stats})) {
+				return [
+					...keptFiles,
+					...readdirRecursiveSync(path, {recurse, filter, transform})
+				];
+			}
+			return keptFiles;
+		}
+
+		if (filter({file, path, stats})) {
+			return [...keptFiles, transform({file, path, stats})];
+		}
+		return keptFiles;
+	}, []);
+};
+
 module.exports = readdirRecursive;
+
+readdirRecursive.sync = readdirRecursiveSync;
