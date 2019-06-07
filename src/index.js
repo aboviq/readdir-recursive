@@ -22,7 +22,17 @@ const readdirRecursive = async (dir, options = {}) => {
 	return files.reduce(async (last, file) => {
 		const keptFiles = await last;
 		const path = resolve(dir, file);
-		const stats = await statP(path);
+		let stats;
+
+		try {
+			stats = await statP(path);
+		} catch (error) {
+			if (error.code === 'ENOENT') {
+				// This happens for symlinks pointing to non-existing files
+				return keptFiles;
+			}
+			throw error;
+		}
 
 		if (stats.isDirectory()) {
 			if (await recurse({dir: file, path, stats})) {
@@ -47,7 +57,17 @@ const readdirRecursiveSync = (dir, options = {}) => {
 
 	return files.reduce((keptFiles, file) => {
 		const path = resolve(dir, file);
-		const stats = statSync(path);
+		let stats;
+
+		try {
+			stats = statSync(path);
+		} catch (error) {
+			if (error.code === 'ENOENT') {
+				// This happens for symlinks pointing to non-existing files
+				return keptFiles;
+			}
+			throw error;
+		}
 
 		if (stats.isDirectory()) {
 			if (recurse({dir: file, path, stats})) {
