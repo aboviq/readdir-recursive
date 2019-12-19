@@ -55,6 +55,7 @@ describe('readdirRecursive', () => {
 			await sleep(2);
 			return /\.test\./.test(file);
 		};
+
 		const files = await readdirRecursive('.', {filter: onlyTestFiles});
 
 		expect(files).toEqual([__filename]);
@@ -86,6 +87,7 @@ describe('readdirRecursive', () => {
 			await sleep(2);
 			return dir !== 'src' && dir !== 'node_modules';
 		};
+
 		const files = await readdirRecursive('.', {recurse: noSourceFiles});
 
 		expect(files).not.toEqual(expect.arrayContaining([__filename]));
@@ -121,6 +123,7 @@ describe('readdirRecursive', () => {
 			await sleep(2);
 			return `${file}${file}`;
 		};
+
 		const files = await readdirRecursive('.', {transform: doubleFilename});
 
 		expect(files).toEqual(

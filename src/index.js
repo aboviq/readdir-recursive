@@ -22,6 +22,7 @@ const tryReaddirP = async dir => {
 		if (error.code === 'EACCES') {
 			return [];
 		}
+
 		throw error;
 	}
 };
@@ -33,6 +34,7 @@ const tryReaddirSync = dir => {
 		if (error.code === 'EACCES') {
 			return [];
 		}
+
 		throw error;
 	}
 };
@@ -53,10 +55,12 @@ const readdirRecursive = async (dir, options = {}) => {
 				// This happens for symlinks pointing to non-existing files
 				return keptFiles;
 			}
+
 			if (error.code === 'EACCES') {
 				// This happens for folders without read permission
 				return keptFiles;
 			}
+
 			throw error;
 		}
 
@@ -67,12 +71,14 @@ const readdirRecursive = async (dir, options = {}) => {
 					...(await readdirRecursive(path, {recurse, filter, transform}))
 				];
 			}
+
 			return keptFiles;
 		}
 
 		if (await filter({file, path, stats})) {
 			return [...keptFiles, await transform({file, path, stats})];
 		}
+
 		return keptFiles;
 	}, []);
 };
@@ -92,10 +98,12 @@ const readdirRecursiveSync = (dir, options = {}) => {
 				// This happens for symlinks pointing to non-existing files
 				return keptFiles;
 			}
+
 			if (error.code === 'EACCES') {
 				// This happens for folders without read permission
 				return keptFiles;
 			}
+
 			throw error;
 		}
 
@@ -106,12 +114,14 @@ const readdirRecursiveSync = (dir, options = {}) => {
 					...readdirRecursiveSync(path, {recurse, filter, transform})
 				];
 			}
+
 			return keptFiles;
 		}
 
 		if (filter({file, path, stats})) {
 			return [...keptFiles, transform({file, path, stats})];
 		}
+
 		return keptFiles;
 	}, []);
 };
