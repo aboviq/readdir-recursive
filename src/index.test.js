@@ -143,6 +143,10 @@ describe('readdirRecursive', () => {
 
 		expect(files).toEqual(expect.arrayContaining([true]));
 	});
+
+	it("does not crash for permission denied's", async () => {
+		await expect(readdirRecursive('/etc/')).resolves.not.toThrow();
+	});
 });
 
 describe('readdirRecursiveSync', () => {
@@ -251,5 +255,9 @@ describe('readdirRecursiveSync', () => {
 		const files = readdirRecursive.sync('.', {transform: isFile});
 
 		expect(files).toEqual(expect.arrayContaining([true]));
+	});
+
+	it("does not crash for permission denied's", () => {
+		expect(() => readdirRecursive.sync('/etc/')).not.toThrow();
 	});
 });

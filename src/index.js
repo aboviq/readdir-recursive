@@ -15,9 +15,31 @@ const defaultOptions = {
 	transform: defaultTransform
 };
 
+const tryReaddirP = async dir => {
+	try {
+		return await readdirP(dir);
+	} catch (error) {
+		if (error.code === 'EACCES') {
+			return [];
+		}
+		throw error;
+	}
+};
+
+const tryReaddirSync = dir => {
+	try {
+		return readdirSync(dir);
+	} catch (error) {
+		if (error.code === 'EACCES') {
+			return [];
+		}
+		throw error;
+	}
+};
+
 const readdirRecursive = async (dir, options = {}) => {
 	const {recurse, filter, transform} = {...defaultOptions, ...options};
-	const files = await readdirP(dir);
+	const files = await tryReaddirP(dir);
 
 	return files.reduce(async (last, file) => {
 		const keptFiles = await last;
@@ -29,6 +51,10 @@ const readdirRecursive = async (dir, options = {}) => {
 		} catch (error) {
 			if (error.code === 'ENOENT') {
 				// This happens for symlinks pointing to non-existing files
+				return keptFiles;
+			}
+			if (error.code === 'EACCES') {
+				// This happens for folders without read permission
 				return keptFiles;
 			}
 			throw error;
@@ -53,7 +79,7 @@ const readdirRecursive = async (dir, options = {}) => {
 
 const readdirRecursiveSync = (dir, options = {}) => {
 	const {recurse, filter, transform} = {...defaultOptions, ...options};
-	const files = readdirSync(dir);
+	const files = tryReaddirSync(dir);
 
 	return files.reduce((keptFiles, file) => {
 		const path = resolve(dir, file);
@@ -64,6 +90,10 @@ const readdirRecursiveSync = (dir, options = {}) => {
 		} catch (error) {
 			if (error.code === 'ENOENT') {
 				// This happens for symlinks pointing to non-existing files
+				return keptFiles;
+			}
+			if (error.code === 'EACCES') {
+				// This happens for folders without read permission
 				return keptFiles;
 			}
 			throw error;
